@@ -2,16 +2,24 @@
   "name": "my-next-fixed",
   "version": "0.1.0",
   "private": true,
-"scripts": {
-  "dev": "next dev --webpack",
-  "build": "next build --webpack",
-  "start": "next start"
-},
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
   "dependencies": {
     "@headlessui/react": "^2.2.9",
     "@heroicons/react": "^2.2.0",
+    "@next/swc-darwin-arm64": "^16.1.6",
+    "@next/swc-darwin-x64": "^16.1.6",
+    "@next/swc-linux-arm64-gnu": "^16.1.6",
+    "@next/swc-linux-arm64-musl": "^16.1.6",
+    "@next/swc-linux-x64-gnu": "^16.1.6",
+    "@next/swc-linux-x64-musl": "^16.1.6",
+    "@next/swc-win32-arm64-msvc": "^16.1.6",
+    "@next/swc-win32-ia32-msvc": "^16.1.6",
     "@next/swc-win32-x64-msvc": "^16.1.6",
-    "firebase": "^12.8.0",
+    "firebase": "^10.8.0",
     "firebase-admin": "^13.6.0",
     "leaflet": "^1.9.4",
     "leaflet.markercluster": "^1.5.3",
