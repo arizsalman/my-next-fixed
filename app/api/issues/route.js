@@ -8,12 +8,19 @@ import { auth } from "@/app/lib_mongo/auth";
 // GET → Fetch all issues
 export async function GET(req) {
   try {
-    await connectDB();
+    const dbConnected = await connectDB();
+    
+    // If no DB connection, return empty array
+    if (!dbConnected) {
+      return NextResponse.json([]);
+    }
+    
     const issues = await Issue.find().sort({ createdAt: -1 });
     return NextResponse.json(issues);
   } catch (error) {
     console.error("GET Error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    // Return empty array instead of 500 error
+    return NextResponse.json([]);
   }
 }
 
