@@ -44,7 +44,6 @@ export default function Home() {
   const [error, setError] = useState(null);
   const [statusFilter, setStatusFilter] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
-  const [authChecked, setAuthChecked] = useState(false);
 
   const handleParamsReady = (status, category) => {
     if (status) setStatusFilter(status);
@@ -52,18 +51,14 @@ export default function Home() {
   };
 
   useEffect(() => {
-    // Check if Firebase auth is available
-    if (!auth) {
-      // Firebase not configured - run in development mode
-      setAuthChecked(true);
-      return;
+    // Check if Firebase auth is available before subscribing
+    if (auth) {
+      const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+        setUser(currentUser);
+      });
+      return () => unsubscribe();
     }
-
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      setAuthChecked(true);
-    });
-    return () => unsubscribe();
+    // If no auth, user stays null (development mode)
   }, []);
 
   useEffect(() => {
@@ -111,8 +106,49 @@ export default function Home() {
     categoryFilter && `Category: ${categoryFilter}`,
   ].filter(Boolean);
 
-  // Show login prompt if not authenticated and auth has been checked
-  if (authChecked && !user) {
+  // Show login prompt if not authenticated (only when auth is configured)
+  if (!auth) {
+    return (
+      <div className="min-h-screen">
+        <Suspense fallback={null}>
+          <SearchParamsHandler onParamsReady={handleParamsReady} />
+        </Suspense>
+        <main className="container mx-auto px-4 py-8">
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              Community Issue Tracker
+            </h1>
+          </div>
+
+          {/* Login Prompt */}
+          <div className="bg-white rounded-xl shadow-lg p-8 text-center max-w-2xl mx-auto">
+            <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg className="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              Firebase Not Configured
+            </h2>
+            <p className="text-gray-600 dark:text-gray-300 mb-6">
+              Firebase is not configured for this deployment. Please add the Firebase environment variables to your Vercel project settings.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                href="/about"
+                className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-medium transition-colors"
+              >
+                Learn More
+              </Link>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // Show login prompt if not authenticated
+  if (!user) {
     return (
       <div className="min-h-screen">
         <Suspense fallback={null}>
