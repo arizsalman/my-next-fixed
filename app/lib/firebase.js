@@ -12,17 +12,28 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:123456789:web:abcdef",
 };
 
-let app;
-let auth;
+let app = null;
+let auth = null;
 
-try {
-  // Only initialize if we have a real API key (not the demo one)
-  if (process.env.NEXT_PUBLIC_FIREBASE_API_KEY && !process.env.NEXT_PUBLIC_FIREBASE_API_KEY.startsWith("demo")) {
+// Only initialize Firebase if we have real environment variables
+const hasRealConfig =
+  process.env.NEXT_PUBLIC_FIREBASE_API_KEY &&
+  process.env.NEXT_PUBLIC_FIREBASE_API_KEY !== "demo-api-key" &&
+  process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN;
+
+if (typeof window !== "undefined" && hasRealConfig) {
+  try {
     app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
     auth = getAuth(app);
+  } catch (error) {
+    console.warn("Firebase initialization failed:", error.message);
   }
-} catch (error) {
-  console.warn("Firebase initialization skipped during build");
+}
+
+// Create a mock auth object for development when Firebase isn't configured
+if (!auth && typeof window !== "undefined") {
+  // eslint-disable-next-line no-console
+  console.log("Firebase not configured - running in development mode");
 }
 
 export { app, auth };

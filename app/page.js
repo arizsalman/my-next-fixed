@@ -44,6 +44,7 @@ export default function Home() {
   const [error, setError] = useState(null);
   const [statusFilter, setStatusFilter] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
+  const [authChecked, setAuthChecked] = useState(false);
 
   const handleParamsReady = (status, category) => {
     if (status) setStatusFilter(status);
@@ -51,8 +52,16 @@ export default function Home() {
   };
 
   useEffect(() => {
+    // Check if Firebase auth is available
+    if (!auth) {
+      // Firebase not configured - run in development mode
+      setAuthChecked(true);
+      return;
+    }
+
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
+      setAuthChecked(true);
     });
     return () => unsubscribe();
   }, []);
@@ -102,8 +111,8 @@ export default function Home() {
     categoryFilter && `Category: ${categoryFilter}`,
   ].filter(Boolean);
 
-  // Show login prompt if not authenticated
-  if (!user) {
+  // Show login prompt if not authenticated and auth has been checked
+  if (authChecked && !user) {
     return (
       <div className="min-h-screen">
         <Suspense fallback={null}>
