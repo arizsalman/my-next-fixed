@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -24,15 +24,31 @@ const CATEGORIES = [
   "Other",
 ];
 
-export default function Home() {
+function SearchParamsHandler({ onParamsReady }) {
   const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const status = searchParams.get("status");
+    const category = searchParams.get("category");
+    onParamsReady(status, category);
+  }, [searchParams, onParamsReady]);
+
+  return null;
+}
+
+export default function Home() {
   const [user, setUser] = useState(null);
   const [issues, setIssues] = useState([]);
   const [allIssues, setAllIssues] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [statusFilter, setStatusFilter] = useState(searchParams.get("status") || "");
-  const [categoryFilter, setCategoryFilter] = useState(searchParams.get("category") || "");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
+
+  const handleParamsReady = (status, category) => {
+    if (status) setStatusFilter(status);
+    if (category) setCategoryFilter(category);
+  };
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -40,13 +56,6 @@ export default function Home() {
     });
     return () => unsubscribe();
   }, []);
-
-  useEffect(() => {
-    const status = searchParams.get("status");
-    const category = searchParams.get("category");
-    if (status) setStatusFilter(status);
-    if (category) setCategoryFilter(category);
-  }, [searchParams]);
 
   useEffect(() => {
     fetch("/api/issues")
@@ -97,6 +106,9 @@ export default function Home() {
   if (!user) {
     return (
       <div className="min-h-screen">
+        <Suspense fallback={null}>
+          <SearchParamsHandler onParamsReady={handleParamsReady} />
+        </Suspense>
         <main className="container mx-auto px-4 py-8">
           <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
@@ -140,6 +152,9 @@ export default function Home() {
 
   return (
     <div className="min-h-screen">
+      <Suspense fallback={null}>
+        <SearchParamsHandler onParamsReady={handleParamsReady} />
+      </Suspense>
       <main className="container mx-auto px-4 py-8">
         <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
@@ -157,7 +172,7 @@ export default function Home() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="px-35 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="px-3 py-1.5 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 {STATUS_OPTIONS.map((status) => (
                   <option key={status} value={status}>
