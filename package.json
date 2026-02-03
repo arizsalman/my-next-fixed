@@ -2,24 +2,30 @@
   "name": "my-next-fixed",
   "version": "0.1.0",
   "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
-  },
+"scripts": {
+  "dev": "next dev --webpack",
+  "build": "next build --webpack",
+  "start": "next start"
+},
   "dependencies": {
     "@headlessui/react": "^2.2.9",
     "@heroicons/react": "^2.2.0",
+    "@next/swc-win32-x64-msvc": "^16.1.6",
     "firebase": "^12.8.0",
+    "firebase-admin": "^13.6.0",
+    "leaflet": "^1.9.4",
+    "leaflet.markercluster": "^1.5.3",
     "mongodb": "^7.0.0",
-    "next": "16.1.6",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
-    "react-icons": "^5.5.0"
+    "mongoose": "^9.1.5",
+    "next": "^16.1.6",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "react-hot-toast": "^2.6.0",
+    "react-icons": "^5.5.0",
+    "react-leaflet": "^5.0.0"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
+    "@tailwindcss/postcss": "^4.1.18",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "tailwindcss": "^4"
