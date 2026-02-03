@@ -1,12 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import CommentSection from "../../component/CommentSection";
 import UpvoteButton from "../../component/UpvoteButton";
-import { auth } from "../../lib/firebase";
-import { onAuthStateChanged } from "firebase/auth";
 
 // Dynamically import MapComponent to avoid SSR issues with Leaflet
 const MapComponent = dynamic(() => import("../../component/MapComponent"), {
@@ -19,8 +17,7 @@ const statusColors = {
   "Resolved": "bg-green-500",
 };
 
-export default function IssueDetail() {
-
+function IssueDetailContent() {
   const searchParams = useSearchParams();
   const issueId = searchParams.get("id");
 
@@ -28,15 +25,6 @@ export default function IssueDetail() {
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    // Track auth state
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-    });
-    return () => unsubscribe();
-  }, []);
 
   useEffect(() => {
     if (!issueId) {
@@ -62,7 +50,7 @@ export default function IssueDetail() {
       });
   }, [issueId]);
 
-  const handleVoteChange = (newUpvotes, newHasUpvoted) => {
+  const handleVoteChange = (newUpvotes) => {
     setIssue((prev) => ({
       ...prev,
       upvotes: newUpvotes,
@@ -135,7 +123,6 @@ export default function IssueDetail() {
                 <UpvoteButton
                   issueId={issueId}
                   initialUpvotes={issue.upvotes || 0}
-                  initialHasUpvoted={issue.upvoters?.includes(user?.uid) || false}
                   onVoteChange={handleVoteChange}
                 />
               </div>
@@ -193,26 +180,27 @@ export default function IssueDetail() {
                 Lat: {issue.latitude?.toFixed(6)}, Lng: {issue.longitude?.toFixed(6)}
               </p>
             </div>
-
-            {/* Actions */}
-            <div className="bg-white rounded-lg shadow-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Actions</h3>
-              <div className="space-y-2">
-                {user && user.uid === issue.author?.uid && (
-                  <>
-                    <button className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
-                      Edit Issue
-                    </button>
-                    <button className="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors">
-                      Delete Issue
-                    </button>
-                  </>
-                )}
-              </div>
-            </div>
           </div>
         </div>
       </main>
     </div>
+  );
+}
+
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    </div>
+  );
+}
+
+export default function IssueDetailPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <IssueDetailContent />
+    </Suspense>
   );
 }
