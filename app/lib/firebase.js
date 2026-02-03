@@ -1,9 +1,8 @@
 // Firebase client SDK initialization
-// Handles missing config gracefully
-
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 
+// Use environment variables or fallback for build
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "demo-api-key",
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "demo.firebaseapp.com",
@@ -13,16 +12,17 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:123456789:web:abcdef",
 };
 
-// Initialize Firebase - handle errors gracefully
 let app;
 let auth;
 
 try {
-  app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-  auth = getAuth(app);
+  // Only initialize if we have a real API key (not the demo one)
+  if (process.env.NEXT_PUBLIC_FIREBASE_API_KEY && !process.env.NEXT_PUBLIC_FIREBASE_API_KEY.startsWith("demo")) {
+    app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+    auth = getAuth(app);
+  }
 } catch (error) {
-  console.warn("Firebase initialization skipped:", error.message);
-  auth = null;
+  console.warn("Firebase initialization skipped during build");
 }
 
 export { app, auth };
