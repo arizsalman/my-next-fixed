@@ -21,9 +21,11 @@ export async function POST(req, { params }) {
         if (adminAuth) {
           const decodedToken = await adminAuth.verifyIdToken(token);
           userId = decodedToken.uid;
+        } else {
+          console.warn("Firebase Admin SDK not initialized - cannot verify token");
         }
       } catch (e) {
-        console.error("Token verification failed:", e);
+        console.error("Token verification failed:", e.message);
       }
     }
 

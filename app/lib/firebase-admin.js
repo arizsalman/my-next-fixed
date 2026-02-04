@@ -11,10 +11,17 @@ const hasValidCredentials =
   process.env.FIREBASE_PRIVATE_KEY &&
   process.env.FIREBASE_PRIVATE_KEY.includes("-----BEGIN PRIVATE KEY-----");
 
+console.log("[firebase-admin] hasValidCredentials:", hasValidCredentials);
+console.log("[firebase-admin] FIREBASE_CLIENT_EMAIL:", !!process.env.FIREBASE_CLIENT_EMAIL);
+console.log("[firebase-admin] FIREBASE_PRIVATE_KEY:", !!process.env.FIREBASE_PRIVATE_KEY);
+
 function getAdminAuth() {
   if (initialized) {
+    console.log("[firebase-admin] Returning cached adminAuth:", adminAuth ? "initialized" : "null");
     return adminAuth;
   }
+
+  console.log("[firebase-admin] Initializing... hasValidCredentials:", hasValidCredentials);
 
   if (!hasValidCredentials) {
     console.warn("⚠️ Firebase Admin credentials not found. Running in development mode.");
@@ -30,9 +37,10 @@ function getAdminAuth() {
     try {
       adminAuth = admin.auth();
       initialized = true;
-      console.log("✅ Firebase Admin SDK active");
+      console.log("✅ Firebase Admin SDK active (already initialized)");
       return adminAuth;
     } catch (e) {
+      console.log("[firebase-admin] Admin not initialized yet, initializing now...", e.message);
       // Initialize
       admin.initializeApp({
         credential: admin.credential.cert({
@@ -46,11 +54,11 @@ function getAdminAuth() {
       });
       adminAuth = admin.auth();
       initialized = true;
-      console.log("✅ Firebase Admin SDK initialized");
+      console.log("✅ Firebase Admin SDK initialized successfully");
       return adminAuth;
     }
   } catch (error) {
-    console.error("❌ Firebase Admin SDK error:", error.message);
+    console.error("❌ Firebase Admin SDK error:", error.message, error.stack);
     initialized = true;
     return null;
   }
