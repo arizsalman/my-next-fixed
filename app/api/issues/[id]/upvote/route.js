@@ -21,22 +21,27 @@ export async function POST(req, { params }) {
         if (adminAuth) {
           const decodedToken = await adminAuth.verifyIdToken(token);
           userId = decodedToken.uid;
+          console.log("[upvote] Token verified successfully, userId:", userId);
         } else {
-          console.warn("Firebase Admin SDK not initialized - cannot verify token");
+          console.warn("[upvote] Firebase Admin SDK not initialized - cannot verify token");
         }
       } catch (e) {
-        console.error("Token verification failed:", e.message);
+        console.error("[upvote] Token verification failed:", e.message);
       }
+    } else {
+      console.log("[upvote] No authorization header found");
     }
 
     // Fallback: get user ID from request body or header
     if (!userId) {
       const body = await req.json().catch(() => ({}));
       userId = body.userId || req.headers.get("x-user-id");
+      console.log("[upvote] Using fallback userId:", userId);
     }
 
     if (!userId) {
-      return NextResponse.json({ error: "User ID required" }, { status: 400 });
+      console.error("[upvote] No userId found - returning 400");
+      return NextResponse.json({ error: "User ID required - please sign in again" }, { status: 400 });
     }
 
     const issue = await Issue.findById(id);
@@ -64,6 +69,7 @@ export async function POST(req, { params }) {
 
     await issue.save();
 
+    console.log("[upvote] Success - upvotes:", issue.upvotes, "hasUpvoted:", !hasUpvoted);
     return NextResponse.json({
       upvotes: issue.upvotes,
       hasUpvoted: !hasUpvoted

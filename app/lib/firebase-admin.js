@@ -4,26 +4,27 @@
 let adminAuth = null;
 let initialized = false;
 
-// Only initialize if credentials are valid
-const hasValidCredentials =
-  process.env.FIREBASE_CLIENT_EMAIL &&
-  process.env.FIREBASE_CLIENT_EMAIL.includes("@") &&
-  process.env.FIREBASE_PRIVATE_KEY &&
-  process.env.FIREBASE_PRIVATE_KEY.includes("-----BEGIN PRIVATE KEY-----");
-
-console.log("[firebase-admin] hasValidCredentials:", hasValidCredentials);
-console.log("[firebase-admin] FIREBASE_CLIENT_EMAIL:", !!process.env.FIREBASE_CLIENT_EMAIL);
-console.log("[firebase-admin] FIREBASE_PRIVATE_KEY:", !!process.env.FIREBASE_PRIVATE_KEY);
+// Check credentials dynamically
+function hasValidCredentials() {
+  return (
+    process.env.FIREBASE_CLIENT_EMAIL &&
+    process.env.FIREBASE_CLIENT_EMAIL.includes("@") &&
+    process.env.FIREBASE_PRIVATE_KEY &&
+    process.env.FIREBASE_PRIVATE_KEY.includes("-----BEGIN PRIVATE KEY-----")
+  );
+}
 
 function getAdminAuth() {
-  if (initialized) {
-    console.log("[firebase-admin] Returning cached adminAuth:", adminAuth ? "initialized" : "null");
+  if (initialized && adminAuth) {
     return adminAuth;
   }
 
-  console.log("[firebase-admin] Initializing... hasValidCredentials:", hasValidCredentials);
+  console.log("[firebase-admin] Checking credentials...");
+  console.log("[firebase-admin] FIREBASE_CLIENT_EMAIL:", !!process.env.FIREBASE_CLIENT_EMAIL);
+  console.log("[firebase-admin] FIREBASE_PRIVATE_KEY:", !!process.env.FIREBASE_PRIVATE_KEY);
+  console.log("[firebase-admin] Has valid credentials:", hasValidCredentials());
 
-  if (!hasValidCredentials) {
+  if (!hasValidCredentials()) {
     console.warn("⚠️ Firebase Admin credentials not found. Running in development mode.");
     initialized = true;
     return null;
@@ -37,10 +38,10 @@ function getAdminAuth() {
     try {
       adminAuth = admin.auth();
       initialized = true;
-      console.log("✅ Firebase Admin SDK active (already initialized)");
+      console.log("✅ Firebase Admin SDK active");
       return adminAuth;
     } catch (e) {
-      console.log("[firebase-admin] Admin not initialized yet, initializing now...", e.message);
+      console.log("[firebase-admin] Initializing now...", e.message);
       // Initialize
       admin.initializeApp({
         credential: admin.credential.cert({
