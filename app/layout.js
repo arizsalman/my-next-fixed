@@ -19,7 +19,7 @@ export default function RootLayout({ children }) {
         </main>
         <footer className="py-6 mt-auto">
           <div className="container mx-auto px-4 text-center text-sm text-gray-600 dark:text-gray-400">
-            <p>© 2024 Community Issue Tracker. All rights reserved.</p>
+            <p>© 2026 Community Issue Tracker. All rights reserved.</p>
           </div>
         </footer>
       </body>
