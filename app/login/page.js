@@ -27,20 +27,54 @@ export default function Login() {
   const [message, setMessage] = useState("");
 
   const [mounted, setMounted] = useState(false);
+  const [authReady, setAuthReady] = useState(false);
+
   useEffect(() => {
     setMounted(true);
+    // Wait a bit for Firebase to initialize
+    const timer = setTimeout(() => {
+      setAuthReady(true);
+    }, 100);
+    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
-    if (!mounted) return;
+    if (!mounted || !auth) return;
     const unsub = onAuthStateChanged(auth, (u) => {
       setUser(u);
     });
     return () => unsub();
-  }, [mounted]);
+  }, [mounted, auth]);
 
-  if (!mounted) {
-    return null;
+  // Show loading state while mounting
+  if (!mounted || !authReady) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-8 bg-gray-100">
+        <div className="w-full max-w-md bg-white rounded-lg shadow-lg overflow-hidden">
+          <div className="p-10 bg-slate-800 text-white">
+            <div className="flex justify-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error if Firebase is not configured
+  if (!auth) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-8 bg-gray-100">
+        <div className="w-full max-w-md bg-white rounded-lg shadow-lg overflow-hidden">
+          <div className="p-10 bg-slate-800 text-white">
+            <h2 className="text-2xl font-semibold mb-6">Firebase Not Configured</h2>
+            <p className="text-slate-300 mb-4">
+              Firebase is not configured for this application. Please add the Firebase environment variables.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   async function handleGoogle() {

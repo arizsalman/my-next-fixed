@@ -30,11 +30,6 @@ if (typeof window !== "undefined" && hasRealConfig) {
   }
 }
 
-// Create a mock auth object for development when Firebase isn't configured
-if (!auth && typeof window !== "undefined") {
-  // eslint-disable-next-line no-console
-  console.log("Firebase not configured - running in development mode");
-}
-
+// Export auth - will be null if Firebase isn't configured
 export { app, auth };
 export default app;

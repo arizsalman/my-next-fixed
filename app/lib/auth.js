@@ -18,6 +18,7 @@ const googleProvider = new GoogleAuthProvider();
 const githubProvider = new GithubAuthProvider();
 
 export async function signInWithGoogle(remember = true) {
+  if (!auth) throw new Error("Firebase not configured");
   await setPersistence(auth, remember ? browserLocalPersistence : browserSessionPersistence);
   try {
     return await signInWithPopup(auth, googleProvider);
@@ -34,6 +35,7 @@ export async function signInWithGoogle(remember = true) {
 }
 
 export async function signInWithGitHub(remember = true) {
+  if (!auth) throw new Error("Firebase not configured");
   await setPersistence(auth, remember ? browserLocalPersistence : browserSessionPersistence);
   try {
     return await signInWithPopup(auth, githubProvider);
@@ -50,18 +52,22 @@ export async function signInWithGitHub(remember = true) {
 }
 
 export async function signInWithEmail({ email, password, remember = true }) {
+  if (!auth) throw new Error("Firebase not configured");
   await setPersistence(auth, remember ? browserLocalPersistence : browserSessionPersistence);
   return signInWithEmailAndPassword(auth, email, password);
 }
 
 export async function registerWithEmail({ email, password }) {
+  if (!auth) throw new Error("Firebase not configured");
   return createUserWithEmailAndPassword(auth, email, password);
 }
 
 export async function signOutUser() {
+  if (!auth) return;
   return firebaseSignOut(auth);
 }
 
 export async function resetPassword(email) {
+  if (!auth) throw new Error("Firebase not configured");
   return sendPasswordResetEmail(auth, email);
 }
