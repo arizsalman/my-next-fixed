@@ -64,6 +64,10 @@ export default function AdminPanel() {
       const adminEmails = [
         "muhammadarizsalman@gmail.com",
         "admin@locallink.com",
+        "admin@gmail.com",
+        "admin123@gmail.com",
+        "adim1234@gmail.com",
+        "adim12345@gmail.com",
       ];
       const admin =
         idTokenResult.claims.role === "admin" ||
