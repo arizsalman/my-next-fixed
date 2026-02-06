@@ -37,6 +37,7 @@ function SearchParamsHandler({ onParamsReady }) {
 }
 
 export default function Home() {
+  const [mounted, setMounted] = useState(false);
   const [user, setUser] = useState(null);
   const [issues, setIssues] = useState([]);
   const [allIssues, setAllIssues] = useState([]);
@@ -44,6 +45,10 @@ export default function Home() {
   const [error, setError] = useState(null);
   const [statusFilter, setStatusFilter] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleParamsReady = (status, category) => {
     if (status) setStatusFilter(status);
@@ -105,6 +110,27 @@ export default function Home() {
     statusFilter && `Status: ${statusFilter}`,
     categoryFilter && `Category: ${categoryFilter}`,
   ].filter(Boolean);
+
+  // Show loading state while mounting (consistent between server/client)
+  if (!mounted) {
+    return (
+      <div className="min-h-screen">
+        <Suspense fallback={null}>
+          <SearchParamsHandler onParamsReady={handleParamsReady} />
+        </Suspense>
+        <main className="container mx-auto px-4 py-8">
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              Community Issue Tracker
+            </h1>
+          </div>
+          <div className="flex justify-center items-center min-h-[400px]">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   // Show login prompt if not authenticated (only when auth is configured)
   if (!auth) {
